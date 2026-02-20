@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Seeder (Embedded Data)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #3ecf8e;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #34b27b;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #logs {
+            margin-top: 2rem;
+            background: #222;
+            color: #0f0;
+            padding: 1rem;
+            border-radius: 6px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .error {
+            color: #ff5555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🌱 Supabase Data Seeder</h1>
+        <p>This tool inserts data directly into your Supabase database.</p>
+
+        <div class="form-group">
+            <label>Supabase Project URL</label>
+            <input type="text" id="url" value="https://anppxxmlqjgtetvnllaf.supabase.co">
+        </div>
+
+        <div class="form-group">
+            <label>Supabase Anon Public Key</label>
+            <input type="password" id="key"
+                value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFucHB4eG1scWpndGV0dm5sbGFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjQyMjcsImV4cCI6MjA4NTg0MDIyN30.flxUMH0lWYnQf8stJrhdm5CgxbOWRjiRXf01WyRF4kg">
+        </div>
+
+        <button id="seedBtn" onclick="startSeeding()">Start Seeding</button>
+    </div>
+
+    <div id="logs">Waiting to start...</div>
+
+    <script>
+        // EMBEDDED DATA START
+        const EMBEDDED_DATA = {
+            "dictionary": {
+                "english": {
+                    "love": {
+                        "definition": "An intense feeling of deep affection; a great interest and pleasure in something",
+                        "partOfSpeech": "noun, verb",
+                        "pronunciation": "/lʌv/",
+                        "etymology": "From Old English lufu, from Proto-Germanic *lubō",
+                        "examples": [
+                            "She fell in love with him at first sight",
+                            "I love reading books",
+                            "Mother's love is unconditional",
+                            "Love conquers all difficulties"
+                        ],
+                        "synonyms": ["affection", "adoration", "devotion", "passion", "fondness"],
+                        "antonyms": ["hate", "dislike", "loathing", "aversion"],
+                        "translations": {
+                            "hindi": {
+                                "word": "प्रेम",
+                                "transliteration": "prem",
+                                "definition": "गहरे स्नेह की तीव्र भावना; किसी चीज़ में बहुत रुचि और आनंद",
+                                "alternates": ["प्यार", "मोहब्बत", "इश्क"]
+                            },
+                            "tamil": {
+                                "word": "காதல்",
+                                "transliteration": "kaadhal",
+                                "definition": "ஆழ்ந்த பாசத்தின் தீவிர உணர்வு; ஏதாவது ஒன்றில் பெரும் ஆர்வம்",
+                                "alternates": ["அன்பு", "பிரேமை"]
+                            },
+                            "telugu": {
+                                "word": "ప్రేమ",
+                                "transliteration": "prema",
+                                "definition": "లోతైన ప్రేమ యొక్క తీవ్రమైన అనుభవం",
+                                "alternates": ["ప్రీతి", "స్నేహం"]
+                            },
+                            "kannada": {
+                                "word": "ಪ್ರೀತಿ",
+                                "transliteration": "preeti",
+                                "definition": "ಆಳವಾದ ಪ್ರೀತಿಯ ತೀವ್ರ ಭಾವನೆ",
+                                "alternates": ["ಪ್ರೇಮ", "ಅನುರಾಗ"]
+                            },
+                            "bengali": {
+                                "word": "ভালোবাসা",
+                                "transliteration": "bhalobasha",
+                                "definition": "গভীর স্নেহের তীব্র অনুভূতি",
+                                "alternates": ["প্রেম", "প্রীতি", "স্নেহ"]
+                            }
+                        }
+                    },
+                    "water": {
+                        "definition": "A colorless, transparent, odorless liquid that forms the seas, lakes, rivers, and rain",
+                        "partOfSpeech": "noun",
+                        "pronunciation": "/ˈwɔːtər/",
+                        "etymology": "From Old English wæter, from Proto-Germanic *watōr",
+                        "examples": [
+                            "Water is essential for life",
+                            "The water in the lake is crystal clear",
+                            "Please give me a glass of water"
+                        ],
+                        "synonyms": ["H2O", "aqua", "liquid"],
+                        "antonyms": [],
+                        "translations": {
+                            "hindi": {
+                                "word": "पानी",
+                                "transliteration": "paani",
+                                "definition": "एक रंगहीन, पारदर्शी तरल पदार्थ",
+                                "alternates": ["जल", "नीर"]
+                            },
+                            "tamil": {
+                                "word": "தண்ணீர்",
+                                "transliteration": "thanneer",
+                                "definition": "நிறமற்ற, வெளிப்படையான திரவம்",
+                                "alternates": ["நீர்", "ஜலம்"]
+                            },
+                            "telugu": {
+                                "word": "నీరు",
+                                "transliteration": "neeru",
+                                "definition": "రంగులేని, పారదర్శక ద్రవం",
+                                "alternates": ["జలం", "వారి"]
+                            },
+                            "kannada": {
+                                "word": "ನೀರು",
+                                "transliteration": "neeru",
+                                "definition": "ಬಣ್ಣರಹಿತ, ಪಾರದರ್ಶಕ ದ್ರವ",
+                                "alternates": ["ಜಲ", "ವಾರಿ"]
+                            },
+                            "bengali": {
+                                "word": "জল",
+                                "transliteration": "jol",
+                                "definition": "বর্ণহীন, স্বচ্ছ তরল পদার্থ",
+                                "alternates": ["পানি", "নীর"]
+                            }
+                        }
+                    },
+                    "peace": {
+                        "definition": "A state of harmony characterized by lack of violence, conflict, or war",
+                        "partOfSpeech": "noun",
+                        "pronunciation": "/piːs/",
+                        "etymology": "From Old French pais, from Latin pax",
+                        "examples": [
+                            "World peace is everyone's dream",
+                            "The peace treaty ended the war",
+                            "Inner peace comes from meditation"
+                        ],
+                        "synonyms": ["harmony", "tranquility", "serenity", "calm"],
+                        "antonyms": ["war", "conflict", "violence", "chaos"],
+                        "translations": {
+                            "hindi": {
+                                "word": "शांति",
+                                "transliteration": "shaanti",
+                                "definition": "हिंसा, संघर्ष या युद्ध की अनुपस्थिति की स्थिति",
+                                "alternates": ["अमन", "सुख"]
+                            },
+                            "tamil": {
+                                "word": "அமைதி",
+                                "transliteration": "amaidhi",
+                                "definition": "வன்முறை, மோதல் அல்லது போரின் இல்லாமையால் வகைப்படுத்தப்படும் நிலை",
+                                "alternates": ["சாந்தி", "நிம்மதி"]
+                            },
+                            "telugu": {
+                                "word": "శాంతి",
+                                "transliteration": "shaanti",
+                                "definition": "హింస, సంఘర్షణ లేదా యుద్ధం లేని సామరస్య స్థితి",
+                                "alternates": ["ప్రశాంతత", "నిమ్మదిక"]
+                            },
+                            "kannada": {
+                                "word": "ಶಾಂತಿ",
+                                "transliteration": "shaanti",
+                                "definition": "ಹಿಂಸೆ, ಸಂಘರ್ಷ ಅಥವಾ ಯುದ್ಧದ ಅನುಪಸ್ಥಿತಿಯ ಸ್ಥಿತಿ",
+                                "alternates": ["ಪ್ರಶಾಂತತೆ", "ನೆಮ್ಮದಿ"]
+                            },
+                            "bengali": {
+                                "word": "শান্তি",
+                                "transliteration": "shaanti",
+                                "definition": "সহিংসতা, সংঘাত বা যুদ্ধের অনুপস্থিতির অবস্থা",
+                                "alternates": ["প্রশান্তি", "নিরবতা"]
+                            }
+                        }
+                    }
+                },
+                "hindi": {
+                    "अहिंसा": {
+                        "definition": "किसी भी जीव को हानि न पहुंचाने का सिद्धांत; गांधी जी का मूल सिद्धांत",
+                        "partOfSpeech": "संज्ञा",
+                        "pronunciation": "/əhɪmsaː/",
+                        "etymology": "संस्कृत से - अ (नहीं) + हिंसा (हानि)",
+                        "examples": [
+                            "गांधी जी अहिंसा के समर्थक थे",
+                            "अहिंसा परमो धर्मः",
+                            "अहिंसा से ही सच्ची जीत मिलती है"
+                        ],
+                        "synonyms": ["अक्रोध", "दया", "करुणा", "शांति"],
+                        "antonyms": ["हिंसा", "क्रूरता", "दुष्टता"],
+                        "translations": {
+                            "english": {
+                                "word": "non-violence",
+                                "transliteration": "non-violence",
+                                "definition": "The principle of not causing harm to any living being"
+                            },
+                            "tamil": {
+                                "word": "அகிம்சை",
+                                "transliteration": "ahimsai",
+                                "definition": "எந்த உயிரினத்திற்கும் தீங்கு விளைவிக்காத கொள்கை"
+                            },
+                            "telugu": {
+                                "word": "అహింస",
+                                "transliteration": "ahimsa",
+                                "definition": "ఏ జీవికి హాని చేయకూడదని సూత్రం"
+                            },
+                            "kannada": {
+                                "word": "ಅಹಿಂಸೆ",
+                                "transliteration": "ahimse",
+                                "definition": "ಯಾವುದೇ ಜೀವಿಗೆ ಹಾನಿ ಮಾಡದಿರುವ ತತ್ವ"
+                            },
+                            "bengali": {
+                                "word": "অহিংসা",
+                                "transliteration": "ohingsha",
+                                "definition": "কোনো জীবের ক্ষতি না করার নীতি"
+                            }
+                        }
+                    }
+                },
+                "tamil": {
+                    "அன்பு": {
+                        "definition": "ஆழ்ந்த பாசம் மற்றும் விருப்பத்தின் உணர்வு; தமிழ் கலாச்சாரத்தின் அடிப்படை",
+                        "partOfSpeech": "பெயர்ச்சொல்",
+                        "pronunciation": "/ənbu/",
+                        "etymology": "தமிழ் மூல வார்த்தை, சங்க இலக்கியத்தில் பயன்படுத்தப்பட்டது",
+                        "examples": [
+                            "தாய் அன்பு உலகில் மிக உயர்ந்தது",
+                            "அன்பே சிவம்",
+                            "அன்பு என்பது வாழ்க்கையின் அர்த்தம்"
+                        ],
+                        "synonyms": ["காதல்", "பாசம்", "நேசம்", "பிரேமை"],
+                        "antonyms": ["வெறுப்பு", "பகை", "துவேஷம்"],
+                        "translations": {
+                            "english": {
+                                "word": "love",
+                                "transliteration": "love",
+                                "definition": "A feeling of deep affection and fondness; foundation of Tamil culture"
+                            },
+                            "hindi": {
+                                "word": "प्रेम",
+                                "transliteration": "prem",
+                                "definition": "गहरे स्नेह और चाहत की भावना"
+                            },
+                            "telugu": {
+                                "word": "ప్రేమ",
+                                "transliteration": "prema",
+                                "definition": "లోతైన ప్రేమ మరియు అభిమానం యొక్క అనుభవం"
+                            },
+                            "kannada": {
+                                "word": "ಪ್ರೀತಿ",
+                                "transliteration": "preeti",
+                                "definition": "ಆಳವಾದ ಪ್ರೀತಿ ಮತ್ತು ಅಭಿಮಾನದ ಭಾವನೆ"
+                            },
+                            "bengali": {
+                                "word": "ভালোবাসা",
+                                "transliteration": "bhalobasha",
+                                "definition": "গভীর স্নেহ ও ভালোবাসার অনুভূতি"
+                            }
+                        }
+                    }
+                },
+                "telugu": {
+                    "సత్యం": {
+                        "definition": "వాస్తవం; నిజం; అబద్ధం కాని విషయం; తెలుగు సంস్కৃতির ముఖ్య విలువ",
+                        "partOfSpeech": "నామవాచకం",
+                        "pronunciation": "/sətyəm/",
+                        "etymology": "సంస్కృతం నుండి, వేద కాలం నుండి వాడుకలో ఉంది",
+                        "examples": [
+                            "సత్యమేవ జయతే",
+                            "సత్యం చెప్పడం మంచిది",
+                            "సత్యం ఎల్లప్పుడూ గెలుస్తుంది"
+                        ],
+                        "synonyms": ["నిజం", "వాస్తవం", "యథార్థం", "తత్వం"],
+                        "antonyms": ["అబద్ధం", "అసత్యం", "మోసం"],
+                        "translations": {
+                            "english": {
+                                "word": "truth",
+                                "transliteration": "truth",
+                                "definition": "Reality; fact; something that is not false; key value in Telugu culture"
+                            },
+                            "hindi": {
+                                "word": "सत्य",
+                                "transliteration": "satya",
+                                "definition": "वास्तविकता; सच; झूठ नहीं"
+                            },
+                            "tamil": {
+                                "word": "உண்மை",
+                                "transliteration": "unmai",
+                                "definition": "உண்மை; நிஜம்; பொய்யல்லாத விஷயம்"
+                            },
+                            "kannada": {
+                                "word": "ಸತ್ಯ",
+                                "transliteration": "satya",
+                                "definition": "ವಾಸ್ತವ; ನಿಜ; ಸುಳ್ಳಲ್ಲದ ವಿಷಯ"
+                            },
+                            "bengali": {
+                                "word": "সত্য",
+                                "transliteration": "shotyo",
+                                "definition": "বাস্তবতা; সত্য; মিথ্যা নয় এমন বিষয়"
+                            }
+                        }
+                    }
+                },
+                "kannada": {
+                    "ಸಂಸ್ಕಾರ": {
+                        "definition": "ಒಳ್ಳೆಯ ಗುಣಗಳು ಮತ್ತು ನಡವಳಿಕೆ; ಸಂಸ್ಕೃತಿ; ಕನ್ನಡ ಸಂಸ್ಕೃತಿಯ ಮೂಲಾಧಾರ",
+                        "partOfSpeech": "ನಾಮಪದ",
+                        "pronunciation": "/sənskɑːrə/",
+                        "etymology": "ಸಂಸ್ಕೃತದಿಂದ, ಪ್ರಾಚೀನ ಕಾಲದಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ",
+                        "examples": [
+                            "ಒಳ್ಳೆಯ ಸಂಸ್ಕಾರ ಮುಖ್ಯ",
+                            "ಸಂಸ್ಕಾರವಂತ ಮಗು",
+                            "ಸಂಸ್ಕಾರ ಸಂಸ್ಕೃತಿಯ ಆಧಾರ"
+                        ],
+                        "synonyms": ["ಶಿಷ್ಟಾಚಾರ", "ಸಂಸ್ಕೃತಿ", "ಮರ್ಯಾದೆ", "ನಾಗರಿಕತೆ"],
+                        "antonyms": ["ದುರಾಚಾರ", "ಅಸಂಸ್ಕಾರ", "ಅಸಭ್ಯತೆ"],
+                        "translations": {
+                            "english": {
+                                "word": "culture",
+                                "transliteration": "culture",
+                                "definition": "Good qualities and behavior; refinement; foundation of Kannada culture"
+                            },
+                            "hindi": {
+                                "word": "संस्कार",
+                                "transliteration": "sanskaar",
+                                "definition": "अच्छे गुण और व्यवहार; संस्कृति"
+                            },
+                            "tamil": {
+                                "word": "பண்பாடு",
+                                "transliteration": "panpaadu",
+                                "definition": "நல்ல குணங்கள் மற்றும் நடத்தை; கலாச்சாரம்"
+                            },
+                            "telugu": {
+                                "word": "సంస్కారం",
+                                "transliteration": "sanskaaram",
+                                "definition": "మంచి గుణాలు మరియు ప్రవర్తన; సంస్కృతి"
+                            },
+                            "bengali": {
+                                "word": "সংস্কার",
+                                "transliteration": "shongshkar",
+                                "definition": "ভালো গুণাবলী ও আচরণ; সংস্কৃতি"
+                            }
+                        }
+                    }
+                },
+                "bengali": {
+                    "শান্তি": {
+                        "definition": "মানসিক প্রশান্তি; যুদ্ধ বা সংঘাতের অনুপস্থিতি; বাঙালি দর্শনের মূল বিষয়",
+                        "partOfSpeech": "বিশেষ্য",
+                        "pronunciation": "/ʃanti/",
+                        "etymology": "সংস্কৃত থেকে, প্রাচীন বৈদিক সাহিত্যে ব্যবহৃত",
+                        "examples": [
+                            "শান্তি বজায় রাখা দরকার",
+                            "মনের শান্তি চাই",
+                            "বিশ্বশান্তি সবার কাম্য"
+                        ],
+                        "synonyms": ["প্রশান্তি", "নিরবতা", "স্থিরতা", "সুখ"],
+                        "antonyms": ["অশান্তি", "যুদ্ধ", "বিশৃঙ্খলা", "কলহ"],
+                        "translations": {
+                            "english": {
+                                "word": "peace",
+                                "transliteration": "peace",
+                                "definition": "Mental tranquility; absence of war or conflict; core of Bengali philosophy"
+                            },
+                            "hindi": {
+                                "word": "शांति",
+                                "transliteration": "shaanti",
+                                "definition": "मानसिक शांति; युद्ध या संघर्ष की अनुपस्थिति"
+                            },
+                            "tamil": {
+                                "word": "அமைதி",
+                                "transliteration": "amaidhi",
+                                "definition": "மன அமைதி; போர் அல்லது மோதலின் இல்லாமை"
+                            },
+                            "telugu": {
+                                "word": "శాంతి",
+                                "transliteration": "shaanti",
+                                "definition": "మానసిక ప్రశాంతత; యుద్ధం లేదా సంఘర్షణ లేకపోవడం"
+                            },
+                            "kannada": {
+                                "word": "ಶಾಂತಿ",
+                                "transliteration": "shaanti",
+                                "definition": "ಮಾನಸಿಕ ಪ್ರಶಾಂತತೆ; ಯುದ್ಧ ಅಥವಾ ಸಂಘರ್ಷದ ಅನುಪಸ್ಥಿತಿ"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        // EMBEDDED DATA END
+
+        const logDiv = document.getElementById('logs');
+        function log(msg, type = 'info') {
+            const el = document.createElement('div');
+            el.textContent = `> ${msg}`;
+            if (type === 'error') el.className = 'error';
+            logDiv.appendChild(el);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function startSeeding() {
+            const url = document.getElementById('url').value.trim();
+            const key = document.getElementById('key').value.trim();
+
+            if (!url || !key) {
+                log('Please provide both URL and Key.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('seedBtn');
+            btn.disabled = true;
+            btn.textContent = 'Seeding...';
+
+            try {
+                log('Initializing Supabase client...');
+                const supabase = window.supabase.createClient(url, key);
+
+                // Use EMBEDDED_DATA instead of fetching
+                log('Reading embedded data...');
+                const data = EMBEDDED_DATA;
+
+                // 2. Process Data
+                log('Processing dictionary data...');
+                let entries = [];
+                const dictionary = data.dictionary || {};
+
+                for (const lang in dictionary) {
+                    for (const word in dictionary[lang]) {
+                        const details = dictionary[lang][word];
+                        entries.push({
+                            word: word,
+                            language: lang,
+                            definition: details.definition,
+                            part_of_speech: details.partOfSpeech,
+                            pronunciation: details.pronunciation,
+                            etymology: details.etymology,
+                            examples: details.examples,
+                            synonyms: details.synonyms,
+                            antonyms: details.antonyms,
+                            translations: details.translations
+                        });
+                    }
+                }
+                log(`Found ${entries.length} entries in embedded data.`);
+
+                // 3. Generate Mock Data
+                const targetCount = 150;
+                const needed = targetCount - entries.length;
+                if (needed > 0) {
+                    log(`Generating ${needed} additional mock entries...`);
+                    const langs = ['english', 'hindi', 'tamil', 'telugu', 'kannada', 'bengali'];
+                    for (let i = 0; i < needed; i++) {
+                        const word = faker.random.word();
+                        entries.push({
+                            word: word,
+                            language: langs[Math.floor(Math.random() * langs.length)],
+                            definition: faker.lorem.sentence(),
+                            part_of_speech: 'noun',
+                            pronunciation: `/${word}/`,
+                            etymology: 'Mock Data',
+                            examples: [faker.lorem.sentence()],
+                            synonyms: [],
+                            antonyms: [],
+                            translations: {}
+                        });
+                    }
+                }
+
+                // 4. Insert into Supabase
+                log(`Inserting ${entries.length} records into 'dictionary' table...`);
+
+                // Insert in batches of 50
+                const batchSize = 50;
+                for (let i = 0; i < entries.length; i += batchSize) {
+                    const batch = entries.slice(i, i + batchSize);
+                    const { error } = await supabase.from('dictionary').insert(batch);
+                    if (error) throw error;
+                    log(`Inserted batch ${i / batchSize + 1}...`);
+                }
+
+                log('✅ Seeding completed successfully!');
+
+            } catch (err) {
+                log(`Error: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Start Seeding';
+            }
+        }
+    </script>
+</body>
+
+</html>
